@@ -53,7 +53,7 @@ public class Main {
 				//p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
 				SpaceSplit test=new SpaceSplit(p,2);
 				System.out.println("Ready");
-				for(int k=10;k<=100;k+=10){
+				for(int k=180;k<=200;k+=10){
 					numAgents=k;
 					for(int i=1;i<=25;i++){
 						String filename=scename+String.valueOf(i)+".scen";
@@ -66,17 +66,17 @@ public class Main {
 						long t1=System.currentTimeMillis();
 					
 					//	test.parallelSort(test.subgraphs, test.sg);
-						//p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
+						p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
 						//long[] re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 3,false);
 					//	long[] re2=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 1,false);
 						//long[] re=Ksplit.solveProblemSuboptimal(p, false,false, 0, 300, 3,false);
-					//	long[] re=Solve.solveProblemArbitrarySplit(p, false,false, 0, 300,false,new double[]{2,1,2});
+						long[] re=Solve.solveProblemArbitrarySplit(p, false,false, 0, 300,false,new double[]{1,1,1});
 					//	long[] re=(new Ecbs()).ECBS_solve_arbitrary(p, new double[]{1,1,1},false);
 						//long[] re=Solve.solveProblem(p, false, 300);
 					//	long[] re=(new Ecbs()).ECBS_solve_suboptimalTT(p, 0,false);
 					//	long[] re=Solve.solveProblemTTSplit(p, 0, 300, 0,false);
 						////long[] re=Ecbs.ECBS_solve(p);	
-						long[] re=(new Ecbs()).ECBS_solve_suboptimal(p, ksplit);	
+					//	long[] re=(new Ecbs()).ECBS_solve_suboptimal(p, ksplit);	
 						long t2=System.currentTimeMillis();
 						//		
 						//long[] re=new long[]{test.subMakeSpan,t2-t1,0,test.makespanLb};

@@ -615,8 +615,6 @@ public class PathPlanner {
 		for(int i = 0; i < paths.length; i ++){
 			// Find an intermediate goal that's about halfway
 			int dd=paths[vArray[i]].vertexList.size();
-			//int dMin = (int)(paths[vArray[i]].vertexList.size()*(1/s));
-		//	int dMax =dMin;
 			int dMin=(int)(paths[vArray[i]].vertexList.size()*s);
 			int dMax=(int)(paths[vArray[i]].vertexList.size()*s);
 			int dMin2=dd-dMin;
@@ -1448,17 +1446,18 @@ public class PathPlanner {
 		
 		for(int i = 0; i < mpieces-1; i ++){
 			double sum=0,s,ss=0;
-			for(int k=0;k<ratio.length;k++){
+			for(int k=i;k<ratio.length;k++){
 				sum+=ratio[k];
 				if(k<=i)ss+=ratio[k];
 			}
 			
-			s=ss/sum;
+			s=ratio[i]/sum;
 			System.out.println("s="+s);
-			int[] middle = splitPathsArbitrary(g, start,goal, false,s);
+			int[] middle = splitPathsArbitrary(g, tmp,goal, false,s);
 			for(int a = 0; a < start.length; a ++){
 				msg[i+1][a] = middle[a];
 			}
+			tmp=middle;
 		}
 		for(int i = 0; i < mpieces; i ++){
 			Thread x = createThread(i);
