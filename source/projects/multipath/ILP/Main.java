@@ -36,13 +36,13 @@ public class Main {
 		switch (option){
 			case 0:
 				
-				p=Problem.createGridProblem(64,32,0.05,100);
-				yamlProblem.SaveMap(p.graph,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-64-32-05.map");
+				p=Problem.createGridProblem(64,64,0.00,10);
+				yamlProblem.SaveMap(p.graph,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-64-64-00.map");
 				//System.exit(0);
 				for(int i=1;i<=25;i++){
-					p.graph=Graph.readMap("C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-64-32-05.map");
+					p.graph=Graph.readMap("C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-64-64-00.map");
 					p.sg=Graph.getRandomStartGoalMany(p.graph,800);
-					yamlProblem.saveScenario(p,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/scenarios/random-64-32-05-random-"+i+".scen");
+					yamlProblem.saveScenario(p,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/scenarios/random-64-64-00-random-"+i+".scen");
 				}
 				break;
 			case 1:
@@ -51,37 +51,40 @@ public class Main {
 				p.sg=null;
 				int splits=Integer.parseInt(argv[4]);
 				//p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
-				SpaceSplit test=new SpaceSplit(p,2);
-				System.out.println("Ready");
-				for(int k=180;k<=200;k+=10){
+				//SpaceSplit test=new SpaceSplit(p,4);
+		//		System.out.println("Ready");
+				//p.graph=Graph.readMap(mapname);
+				for(int k=20;k<=300;k+=20){
 					numAgents=k;
 					for(int i=1;i<=25;i++){
 						String filename=scename+String.valueOf(i)+".scen";
 						p.graph=Graph.readMap(mapname);
-						System.out.println("rows="+p.graph.rows+" cols="+p.graph.columns);
+				 		System.out.println("rows="+p.graph.rows+" cols="+p.graph.columns);
 						p.sg=Graph.readScenario(filename,numAgents);
 						//PathPlanner.printStartAndGoals(p.graph, p.sg[0], p.sg[1]);
 						//Solve.checkValid(p.graph, p.sg[0], p.sg[1]);
-					//	test.sg=p.sg;
+						//test.sg=p.sg;
 						long t1=System.currentTimeMillis();
-					
-					//	test.parallelSort(test.subgraphs, test.sg);
-						p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
-						//long[] re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 3,false);
-					//	long[] re2=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 1,false);
+						//p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
+						//long[] re=Solve.solveProblemArbitrarySplitTT(p, false,false, 0, 300,false,new double[]{1,1,1});
+					//	long [] re=test.parallelSortInPhases(test.subgraphs, test.sg);
+						
+						long[] re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 4,false);
+					//	long[] re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 0,false);
 						//long[] re=Ksplit.solveProblemSuboptimal(p, false,false, 0, 300, 3,false);
-						long[] re=Solve.solveProblemArbitrarySplit(p, false,false, 0, 300,false,new double[]{1,1,1});
-					//	long[] re=(new Ecbs()).ECBS_solve_arbitrary(p, new double[]{1,1,1},false);
-						//long[] re=Solve.solveProblem(p, false, 300);
-					//	long[] re=(new Ecbs()).ECBS_solve_suboptimalTT(p, 0,false);
-					//	long[] re=Solve.solveProblemTTSplit(p, 0, 300, 0,false);
+					//	long[] re=Solve.solveProblemArbitrarySplit(p, false,false, 0, 300,false,new double[]{1,1,1,1,1,1});
+					//	long[] re=(new Ecbs()).ECBS_solve_arbitrary(p, new double[]{1,1},false);
+					//    long[] re=(new Ecbs()).ECBS_solve_arbitraryTT(p, new double[]{1,1,1,1},false);
+					//	long[] re=Solve.solveProblem(p, false, 300);
+					//	long[] re=(new Ecbs()).ECBS_solve_suboptimalTT(p, 2,false);
+					//	long[] re=Solve.solveProblemTTSplit(p, 0, 300, 2,false);
 						////long[] re=Ecbs.ECBS_solve(p);	
-					//	long[] re=(new Ecbs()).ECBS_solve_suboptimal(p, ksplit);	
+						//long[] re=(new Ecbs()).ECBS_solve_suboptimal(p, ksplit);	
 						long t2=System.currentTimeMillis();
 						//		
 						//long[] re=new long[]{test.subMakeSpan,t2-t1,0,test.makespanLb};
 						//re[3]=PathFinder.getMakespanLowerBound(p.graph, p.sg[0], p.sg[1])-1;
-						
+						//System.out.printf("runtime=%f\n",(t2-t1)/1000.);
 						if(re!=null){
 							re[1]=(t2-t1);
 							//re[3]=PathFinder.getTotalTimeLowerBound(p.graph, p.sg[0], p.sg[1]);
@@ -154,12 +157,12 @@ public class Main {
 				}
 				break;
 			case 4:
-				p=Problem.createGridProblem(32,32,0.00,200);
+				p=Problem.createGridProblem(64,64,0.00,50);
 				
-				long []result=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 3,false);
+				long []result=Solve.solveProblemSuboptimal(p, false,false, 0, 600, 0,false);
 				System.out.println("Makespan="+result[0]+",Lowerbound="+result[3]);
-				result=Ksplit.solveProblemSuboptimal(p, false,false, 0, 12000, 8,false);
-				System.out.println("Makespan="+result[0]+",Lowerbound="+result[3]);
+				//result=Ksplit.solveProblemSuboptimal(p, false,false, 0, 12000, 8,false);
+//	System.out.println("Makespan="+result[0]+",Lowerbound="+result[3]);
 			}
 
 

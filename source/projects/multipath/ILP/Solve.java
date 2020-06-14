@@ -97,6 +97,28 @@ public class Solve{
 		}
 	}
 
+	public static long[] solveProblemArbitrarySplitTT(Problem p, boolean solveLP, boolean setOptimal, int extraSteps,double timeLimit, boolean noCycle,double [] ratio){
+		PathPlanner ms = new PathPlanner();
+        long time = System.currentTimeMillis();
+        // Solve the makespan problem using a 4 split
+        int[][] paths = ms.multiThreadedSplitPlanningArbitraryTT(p.graph, p.sg[0], p.sg[1], timeLimit, ratio);
+        //int[][] paths = ms.multiThreadedSplitPlanningTT(p.graph, p.sg[0], p.sg[1], gap, timeLimit, splits,random);
+        time = System.currentTimeMillis() - time;
+        int ttLB = PathFinder.getTotalTimeLowerBound(p.graph, p.sg[0], p.sg[1]);
+        
+        if(paths != null){
+            int cycles = PathPlanner.hasCycles(paths);
+            if(cycles > 0){
+                System.out.println("\nThere are " + cycles + " cycles in the result paths");
+            }
+        //  PathPlanner.printPaths(p.graph, paths);
+            return new long[]{PathFinder.getTotalTime(paths), time, PathFinder.getTotalDistance(paths), ttLB};
+        }
+        else{
+            return null;
+        }
+	}
+
 	public static long[] solveProblemArbitrarySplit(Problem p, boolean solveLP, boolean setOptimal, int extraSteps,double timeLimit, boolean noCycle,double [] ratio){
 		PathPlanner ms = new PathPlanner();
 		long time = System.currentTimeMillis();
@@ -127,15 +149,15 @@ public class Solve{
 
 			return null;
 		}
-		}
+	}
 
 
 	public static long[] solveProblemTTSplit(Problem p, double gap, double timeLimit, int splits,boolean random){
         PathPlanner ms = new PathPlanner();
         long time = System.currentTimeMillis();
         // Solve the makespan problem using a 4 split
-        //int[][] paths = ms.planPathsAdvancedSplitTT(p.graph, p.sg[0], p.sg[1], gap, timeLimit, splits);
-        int[][] paths = ms.multiThreadedSplitPlanningTT(p.graph, p.sg[0], p.sg[1], gap, timeLimit, splits,random);
+        int[][] paths = ms.planPathsAdvancedSplitTT(p.graph, p.sg[0], p.sg[1], gap, timeLimit, splits);
+        //int[][] paths = ms.multiThreadedSplitPlanningTT(p.graph, p.sg[0], p.sg[1], gap, timeLimit, splits,random);
         time = System.currentTimeMillis() - time;
         int ttLB = PathFinder.getTotalTimeLowerBound(p.graph, p.sg[0], p.sg[1]);
         

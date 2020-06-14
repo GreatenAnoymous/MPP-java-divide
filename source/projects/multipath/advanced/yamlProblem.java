@@ -6,6 +6,7 @@ import java.net.URL;
 
 import java.util.*;
 
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.yaml.snakeyaml.Yaml;
 
 
@@ -228,20 +229,24 @@ public class yamlProblem{
 
     }
 
-
     public  static long[] readOutputYaml(String filename){
+     
         long[] result=new long[4];
         try{
             BufferedReader in = new BufferedReader(new FileReader(filename));
             String str;
-			
-			
+		
+            
+            List<Integer> path=null;
+            int x=0,y=0;
             while ((str = in.readLine()) != null) {
                 String[] strs=str.split("\\s+");
-                if(strs.length>1){
-                  
-                   
-                    
+
+            //    for(int i=0;i<strs.length;i++){
+             //       System.out.print(strs[i]+"@@@");
+              //  }
+              //  System.out.println();
+                if(strs.length>1){                   
                     if(strs[1].equals("makespan:")){
                 
                         result[0]=Integer.parseInt(strs[2]);
@@ -250,14 +255,80 @@ public class yamlProblem{
                     if(strs[1].equals("runtime:")){
                         result[1]=(long)(Double.parseDouble(strs[2])*1000);
                         return result;
+                        
                     }
                     if(strs[1].equals("cost:")){
                         result[2]=Integer.parseInt(strs[2]);
                        
                     }
                 }
+                   
                 
             }
+         
+           // result[3]=Collections.max(paths)*paths.size();
+           
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return result;
+
+    }
+
+
+    public  static int[][] readOutputYamlCost(String filename){
+        List<List<Integer>> paths=new ArrayList<>();
+        int[][] result=null;
+        try{
+            BufferedReader in = new BufferedReader(new FileReader(filename));
+            String str;
+			
+            boolean readPaths=false;
+            
+            List<Integer> path=null;
+            int x=0,y=0,maxlen=0;
+            while ((str = in.readLine()) != null) {
+                String[] strs=str.split("\\s+");
+                if(strs.length>1){                   
+                    if(strs[1].contains("agent")){
+                        if(readPaths==false){
+                            readPaths=true;
+                            path=new ArrayList<>();
+                        }
+                        else{
+                            paths.add(path); 
+                            maxlen=Math.max(path.size(), maxlen);
+                            path=new ArrayList<>(); 
+                        }
+                    }
+                    if(readPaths){
+                        if (strs[1].contains("-")) x=Integer.parseInt(strs[3]);
+                        if(strs[1].contains("y:")) y=Integer.parseInt(strs[2]);
+                        if(strs[1].contains("t:")){
+                            path.add(x*2000+y);//vid= x*1000+y
+                           // System.out.println((x*2000+y)+" "+x+" "+y);
+                        }
+                    }
+                }
+            }
+            paths.add(path);
+            maxlen=Math.max(path.size(), maxlen);
+            result=new int[paths.size()][maxlen];
+            for(int i=0;i<paths.size();i++){
+                
+                for(int j=0;j<maxlen;j++){
+                    
+                    result[i][j]=paths.get(i).get(Math.min(j,paths.get(i).size()-1));
+                   // System.out.print(result[i][j]+" ");
+                }
+              //  System.out.println();
+            }
+           // System.out.println(maxlen);
+            
+            return result;
+           // result[3]=Collections.max(paths)*paths.size();
+            
         }
         catch(Exception e){
             e.printStackTrace();

@@ -11,7 +11,7 @@ import projects.multipath.advanced.Path;
 import projects.multipath.advanced.Problem;
 import projects.multipath.advanced.yamlProblem;
 import projects.multipath.advanced.Vertex;
-
+import projects.multipath.ILP.PathFinder;
 import projects.multipath.ILP.PathPlanner;
 import projects.multipath.ILP.Solve;
 
@@ -36,6 +36,21 @@ public class Ecbs{
 		
 	}
 
+	private static int[][] mergePaths(int[][] pathFromStart, int[][] pathFromMiddle){
+		if(pathFromStart != null && pathFromMiddle != null){
+			int[][] fullPaths = new int[pathFromStart.length][pathFromStart[0].length + pathFromMiddle[0].length - 1];
+			for(int i = 0; i < pathFromStart.length; i ++){
+				for(int j = 0; j < pathFromStart[0].length; j++){
+					fullPaths[i][j] = pathFromStart[i][j]; 
+				}
+				for(int j = 1; j < pathFromMiddle[0].length; j++){
+					fullPaths[i][pathFromStart[0].length + j - 1] = pathFromMiddle[i][j]; 
+				}
+			}
+			return fullPaths;
+		}
+		return null;
+	}
     
     public static long[] ECBS_solve(Problem p){
         String currentDir="./projects/multipath/ECBS/";
@@ -78,7 +93,12 @@ public class Ecbs{
 		System.out.println("Makespan "+output[0]);
 		return  output;
       
-    }
+	}
+	
+	public static int[][] get_paths(int pid){
+		
+		return yamlProblem.readOutputYamlCost(String.format("./projects/multipath/Ecbs/bin/tmp/output%d.yaml",pid));
+	}
 
 
     public static long[] ECBS_solve(Problem p,int pid){
@@ -130,6 +150,78 @@ public class Ecbs{
     double mtime = 0;
 	int makespan=0;
 	int cost=0;
+	int [][][] mpaths=null;
+
+	public long []ECBS_solve_arbitraryTT(Problem p,double[]ratio,boolean random){
+		try{
+			mg = p.graph;
+
+			mtime = 300;
+			int []start=p.sg[0];
+			int []goal=p.sg[1];
+			mpieces = ratio.length;
+			msg = new int[mpieces + 1][start.length];
+			mdone = new boolean[mpieces];
+			mpaths=new int[mpieces][][];
+			for(int i = 0;i < start.length; i ++){
+				msg[0][i] = start[i];
+				msg[mpieces][i] = goal[i];
+			}
+			int [] tmp=start;
+			
+			for(int i = 0; i < mpieces-1; i ++){
+				double sum=0,s;
+				for(int k=i;k<ratio.length;k++){
+					sum+=ratio[k];	
+				}				
+				s=ratio[i]/sum;
+				System.out.println("s="+s);
+			//	int[] middle = PathPlanner.splitPathsArbitraryTT(p.graph, tmp,goal, false,s);
+				int[] middle = PathPlanner.splitPathsArbitrary(p.graph, tmp,goal, false,s);
+			//int[] middle = PathPlanner.splitPathsTT(p.graph, tmp,goal, false);
+				for(int a = 0; a < start.length; a ++){
+					msg[i+1][a] = middle[a];
+				}
+				tmp=middle;
+			}
+			for(int i = 0; i < mpieces; i ++){
+				Thread x = createThreadTT(i);
+				x.start();
+			}
+			
+			// Wait for work to finish
+			boolean allDone = false;
+			while(!allDone){
+				allDone = true;
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				for(int i = 0; i < mpieces; i ++){
+					if(mdone[i] == false){
+						allDone = false;
+						break;
+					}
+				}
+			}
+			int[][] finalPath=null;
+			finalPath=mpaths[0];
+			for(int i=1;i<mpieces;i++){
+				finalPath=mergePaths(finalPath,mpaths[i]);
+			}
+		
+		
+			//return new long[]{PathFinder.getTotalTime(finalPath),0,0,0};
+			
+			return new long[]{PathFinder.getTotalTime(finalPath),0,0,0};
+		}
+		catch(Exception e){
+			return null;
+		}
+	}
+	
 
 	public long []ECBS_solve_arbitrary(Problem p,double[]ratio,boolean random){
 		mg = p.graph;
@@ -139,6 +231,7 @@ public class Ecbs{
 		mpieces = ratio.length;
 		msg = new int[mpieces + 1][start.length];
 		mdone = new boolean[mpieces];
+		mpaths=new int[mpieces][][];
 		for(int i = 0;i < start.length; i ++){
 			msg[0][i] = start[i];
 			msg[mpieces][i] = goal[i];
@@ -147,17 +240,18 @@ public class Ecbs{
 		
 		for(int i = 0; i < mpieces-1; i ++){
 			double sum=0,s,ss=0;
-			for(int k=0;k<ratio.length;k++){
+			for(int k=i;k<ratio.length;k++){
 				sum+=ratio[k];
-				if(k<=i)ss+=ratio[k];
+				
 			}
 			
-			s=ss/sum;
+			s=ratio[i]/sum;
 			System.out.println("s="+s);
-			int[] middle = PathPlanner.splitPathsArbitrary(p.graph, start,goal, false,s);
+			int[] middle = PathPlanner.splitPathsArbitrary(p.graph, tmp,goal, false,s);
 			for(int a = 0; a < start.length; a ++){
 				msg[i+1][a] = middle[a];
 			}
+			tmp=middle;
 		}
 		for(int i = 0; i < mpieces; i ++){
 			Thread x = createThread(i);
@@ -182,61 +276,76 @@ public class Ecbs{
 			}
 		}
 		
-		return new long[]{makespan,0,0,0};
+		return new long[]{cost,0,0,0};
 	}
 	
+	
 	public long[]ECBS_solve_suboptimalTT(Problem p,int splits,boolean random){
-		mg = p.graph;
-        int []start=p.sg[0];
-        int []goal=p.sg[1];
+		try{
+			mg = p.graph;
+			int []start=p.sg[0];
+			int []goal=p.sg[1];
 
-	//	mtime = timeLimit;
-		mpieces = (int)Math.pow(2, splits);
-		msg = new int[mpieces + 1][start.length];
-		mdone = new boolean[mpieces];
-		for(int i = 0;i < start.length; i ++){
-			msg[0][i] = start[i];
-			msg[mpieces][i] = goal[i];
-		}
+		//	mtime = timeLimit;
+			mpieces = (int)Math.pow(2, splits);
+			msg = new int[mpieces + 1][start.length];
+			mdone = new boolean[mpieces];
+			mpaths=new int[mpieces][][];
+			for(int i = 0;i < start.length; i ++){
+				msg[0][i] = start[i];
+				msg[mpieces][i] = goal[i];
+			}
+			
 		
-       
-		// Do splitting
-		for(int i = 0; i < splits; i ++){
-			int numSplits = (int)Math.pow(2, i);
-			int stepSize = (int)Math.pow(2, splits - i);
-			for(int s = 0; s < numSplits; s++){
-				int[] middle = PathPlanner.splitPathsTT(p.graph, msg[s*stepSize], msg[(s+1)*stepSize], random);
-				//int[] middle = PathPlanner.splitPaths(p.graph, msg[s*stepSize], msg[(s+1)*stepSize], random);
-				for(int a = 0; a < start.length; a ++){
-					msg[s*stepSize + stepSize/2][a] = middle[a];
+			// Do splitting
+			for(int i = 0; i < splits; i ++){
+				int numSplits = (int)Math.pow(2, i);
+				int stepSize = (int)Math.pow(2, splits - i);
+				for(int s = 0; s < numSplits; s++){
+					int[] middle = PathPlanner.splitPathsTT(p.graph, msg[s*stepSize], msg[(s+1)*stepSize], random);
+				//	int[] middle = PathPlanner.splitPaths(p.graph, msg[s*stepSize], msg[(s+1)*stepSize], random);
+					for(int a = 0; a < start.length; a ++){
+						msg[s*stepSize + stepSize/2][a] = middle[a];
+					}
 				}
 			}
-		}
-	//	System.out.println("Begin");
-		// Plan each piece using a thread
-		for(int i = 0; i < mpieces; i ++){
-			Thread x = createThread(i);
-			x.start();
-		}
-		
-		// Wait for work to finish
-		boolean allDone = false;
-		while(!allDone){
-			allDone = true;
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		//	System.out.println("Begin");
+			// Plan each piece using a thread
 			for(int i = 0; i < mpieces; i ++){
-				if(mdone[i] == false){
-					allDone = false;
-					break;
+				Thread x = createThreadTT(i);
+				x.start();
+			}
+			
+			// Wait for work to finish
+			boolean allDone = false;
+			while(!allDone){
+				allDone = true;
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				for(int i = 0; i < mpieces; i ++){
+					if(mdone[i] == false){
+						allDone = false;
+						break;
+					}
 				}
 			}
+			int[][] finalPath=null;
+			finalPath=mpaths[0];
+			for(int i=1;i<mpieces;i++){
+				finalPath=mergePaths(finalPath,mpaths[i]);
+			}
+		
+		
+			return new long[]{PathFinder.getTotalTime(finalPath),0,0,0};
 		}
-		return new long[]{cost,0,0,0};
+		catch(Exception e){
+			return null;
+		}
+		
 	}
 
     public long[] ECBS_solve_suboptimal(Problem p,int splits){
@@ -308,7 +417,30 @@ public class Ecbs{
 							
                             long[] output=ECBS_solve(pp,i);
 							makespan+=output[0];
-							cost+=output[2];
+							if(i==mpieces-1)cost+=output[2];
+							else cost+=output[3];
+							mdone[i] = true;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					};
+				});
+	}
+
+
+	private Thread createThreadTT(final int i){
+		return new Thread(
+				new Runnable(){
+					@Override
+					public void run(){
+                        Problem pp=new Problem();
+                        pp.graph=mg;
+                        pp.sg=new int[2][];
+                        pp.sg[0]=msg[i];
+                        pp.sg[1]=msg[i+1];
+						try {
+							ECBS_solve(pp,i);
+							mpaths[i]=get_paths(i);
 							mdone[i] = true;
 						} catch (Exception e) {
 							e.printStackTrace();

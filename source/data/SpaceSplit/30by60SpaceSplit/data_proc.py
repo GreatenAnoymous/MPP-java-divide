@@ -62,18 +62,20 @@ plt.figure()
 l0,=plt.plot(numAgents,np.array(meantimeSS)/1000.,marker='o',color='blue')
 l1,=plt.plot(numAgents,np.array(meantimeTS)/1000.,marker='D',color='red')
 l2,=plt.plot([50,60,70],[54.242,136.6,185.7],marker='s',color='purple')
-plt.xlabel(r'Number of Agents in $30\times 60$ grids')
-plt.ylabel('Average computation time in seconds')
+plt.xlabel('Number of Robots (N)')
+plt.ylabel('Computation Time (s)')
 plt.legend(handles=[l0,l1,l2],labels=['2-space-split','2-time-split','Non-split'])
+plt.savefig("comparison-time-space-runtime.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 
 plt.figure()
 l0,=plt.plot(numAgents,np.array(OptSS),marker='o',color='blue')
 l1,=plt.plot(numAgents,np.array(OptTS),marker='D',color='red')
 
-plt.xlabel(r'Number of Agents in $30\times 60$ grids')
+plt.xlabel('Number of Robots (N)')
 plt.ylabel('Optimality Ratio')
 plt.legend(handles=[l0,l1],labels=['2-space-split','2-time-split'])
+plt.savefig("comparison-time-sapce-opt.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 ########################################################################
 

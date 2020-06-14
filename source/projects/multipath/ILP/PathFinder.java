@@ -333,13 +333,15 @@ public class PathFinder {
 	public static int getTotalTime(int[][] paths){
 		int sum=0;
 		int l=paths[0].length;
+		System.out.println(l);
 		for(int i=0;i<paths.length;i++){
 			int goal=paths[i][l-1];
 			int t;
 			for(t=l-1;t>=0;t--){
 				if(paths[i][t]!=goal) break;
 			}
-			sum+=t+1;
+		
+			sum+=t+2;
 		}
 		return sum;
 

@@ -10,9 +10,25 @@ import pandas as pd
 def read_data(filename,num):
 	rawData=np.loadtxt(filename)
 	frame=pd.DataFrame(rawData,columns=['numAgents','makespan','runtime','makespanLB'])
-	frame.eval('OptimalRatio=(makespan+2)/makespanLB',inplace=True)
+	frame.eval('OptimalRatio=(makespan)/makespanLB',inplace=True)
+	frame=frame.fillna(150000)
+	frame=frame[(frame['numAgents'].isin([num]))]
+	#print(frame)
+	frame=frame[frame['runtime']<150001]
+	print(frame)
+	temp=frame[['numAgents','makespan','runtime','makespanLB','OptimalRatio']].mean()
+	print("\n")
+	print(temp)
+	return temp
+	
+def read_data1(filename,num):
+	rawData=np.loadtxt(filename)
+	frame=pd.DataFrame(rawData,columns=['numAgents','makespan','runtime','makespanLB'])
+	frame.eval('OptimalRatio=(makespan)/makespanLB',inplace=True)
 	frame=frame[(~frame['runtime'].isin([np.nan]))]
 	frame=frame[(frame['numAgents'].isin([num]))]
+	#print(frame)
+	frame=frame[frame['runtime']<300000]
 	print(frame)
 	temp=frame[['numAgents','makespan','runtime','makespanLB','OptimalRatio']].mean()
 	print("\n")
@@ -71,42 +87,50 @@ opt4t=[]
 opt5t=[]
 opt6t=[]
 #opt16s8t55=[]
-
 numAgents=get_num_agents('./ILP/random-32-32-10-random.txt')
 for a in numAgents:
 	tmp=read_data('./ILP/random-32-32-10-random.txt',a)
+	tmp1=read_data1('./ILP/random-32-32-10-random.txt',a)
 	meanTimeILP.append(tmp['runtime'])
-	opt.append(tmp['OptimalRatio'])
+	opt.append(tmp1['OptimalRatio'])
+
 	
 numAgents=get_num_agents('./2t/random-32-32-10-random.txt')
 for a in numAgents:
+	tmp1=read_data1('./2t/random-32-32-10-random.txt',a)
 	tmp=read_data('./2t/random-32-32-10-random.txt',a)
 	meanTime2t.append(tmp['runtime'])
-	opt2t.append(tmp['OptimalRatio'])	
+	opt2t.append(tmp1['OptimalRatio'])	
+	
+
 
 numAgents=get_num_agents('./3t/random-32-32-10-random.txt')
 for a in numAgents:
 	tmp=read_data('./3t/random-32-32-10-random.txt',a)
+	tmp1=read_data1('./3t/random-32-32-10-random.txt',a)
 	meanTime3t.append(tmp['runtime'])
-	opt3t.append(tmp['OptimalRatio'])
+	opt3t.append(tmp1['OptimalRatio'])
 
 numAgents=get_num_agents('./4t/random-32-32-10-random.txt')	
 for a in numAgents:
 	tmp=read_data('./4t/random-32-32-10-random.txt',a)
+	tmp1=read_data1('./4t/random-32-32-10-random.txt',a)
 	meanTime4t.append(tmp['runtime'])
-	opt4t.append(tmp['OptimalRatio'])
+	opt4t.append(tmp1['OptimalRatio'])
 
 numAgents=get_num_agents('./5t/random-32-32-10-random.txt')		
 for a in numAgents:
 	tmp=read_data('./5t/random-32-32-10-random.txt',a)
+	tmp1=read_data1('./5t/random-32-32-10-random.txt',a)
 	meanTime5t.append(tmp['runtime'])
-	opt5t.append(tmp['OptimalRatio'])
+	opt5t.append(tmp1['OptimalRatio'])
 	
 numAgents=get_num_agents('./6t/random-32-32-10-random.txt')		
 for a in numAgents:
 	tmp=read_data('./6t/random-32-32-10-random.txt',a)
+	tmp1=read_data1('./6t/random-32-32-10-random.txt',a)
 	meanTime6t.append(tmp['runtime'])
-	opt6t.append(tmp['OptimalRatio'])
+	opt6t.append(tmp1['OptimalRatio'])
 
 ########################################################################	
 plt.figure()
@@ -127,10 +151,12 @@ l5,=plt.plot(numAgents,np.array(meanTime6t)/1000.,marker=6,color='purple')
 #l1,=plt.plot(numAgents,np.array(meantime9SS)/1000.,marker='s',color='red')
 
 
-plt.xlabel(r'Number of Agents in 32 $\times$ 32 grid ')
-plt.ylabel('Average computation time in seconds')
+plt.xlabel('Number of Robots (N)')
+plt.ylabel('Computation Time (s)')
 plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-3t','ILP-4t','ILP-5t','ILP-6t'])
+plt.savefig("ksplit-32-32-runtime.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
+
 
 
 
@@ -147,9 +173,10 @@ numAgents=get_num_agents('./5t/random-32-32-10-random.txt')
 l4,=plt.plot(numAgents,opt5t,marker=5,color='black')
 numAgents=get_num_agents('./6t/random-32-32-10-random.txt')
 l5,=plt.plot(numAgents,opt6t,marker=6,color='purple')
-plt.xlabel(r'Number of Agents in 32 $\times$ 32 grid')
+plt.xlabel('Number of Robots (N)')
 plt.ylabel('Optimality Ratio')
 plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-3t','ILP-4t','ILP-5t','ILP-6t'])
+plt.savefig("ksplit-32-32-opt.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 ################################################################################################
 
@@ -212,7 +239,7 @@ for a in numAgents:
 
 ########################################################################	
 plt.figure()
-plt.ylim(0, 300)
+plt.ylim(0, 150)
 numAgents=get_num_agents('./ILP-tt/random-32-32-10-random.txt')
 l0,=plt.plot(numAgents,np.array(meanTimeILP_tt)/1000.,marker='o',color='blue')
 numAgents=get_num_agents('./2t-tt/random-32-32-10-random.txt')
@@ -229,9 +256,10 @@ l5,=plt.plot(numAgents,np.array(meanTimeECBS4t_tt)/1000.,marker=6,color='purple'
 #l1,=plt.plot(numAgents,np.array(meantime9SS)/1000.,marker='s',color='red')
 
 
-plt.xlabel(r'Number of Agents in 32 $\times$ 32 grid ')
-plt.ylabel('Average computation time in seconds')
+plt.xlabel('Number of Robots (N)')
+plt.ylabel('Computation Time (s)')
 plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-4t','ECBS','ECBS-2t','ECBS-4t'])
+plt.savefig("ksplit-32-32-runtime-flowtime.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 
 
@@ -249,9 +277,10 @@ numAgents=get_num_agents('./ecbs-2t-tt/random-32-32-10-random.txt')
 l4,=plt.plot(numAgents,optECBS2t_tt,marker=5,color='black')
 numAgents=get_num_agents('./ecbs-4t-tt/random-32-32-10-random.txt')
 l5,=plt.plot(numAgents,optECBS4t_tt,marker=6,color='purple')
-plt.xlabel(r'Number of Agents in 32 $\times$ 32 grid')
+plt.xlabel('Number of Robots (N)')
 plt.ylabel('Optimality Ratio')
 plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-4t','ECBS','ECBS-2t','ECBS-4t'])
+plt.savefig("ksplit-32-32-opt-flowtime.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 ################################################################################################
 
@@ -290,7 +319,7 @@ numAgents=get_num_agents('./2t-even-sum-of-costs/random-32-32-10-random-3.txt')
 l2,=plt.plot(numAgents,np.array(meanTime3)/1000,marker='x',color='green')
 numAgents=get_num_agents('./2t-even-sum-of-costs/random-32-32-10-random-4.txt')
 l3,=plt.plot(numAgents,np.array(meanTime4)/1000,marker='D',color='orange')
-plt.xlabel(r'Number of Agents in 32 $\times$ 32 grid')
+plt.xlabel('Robots')
 plt.ylabel('Runtime/s')
 plt.xlim(0,110)
 plt.ylim(0,61)

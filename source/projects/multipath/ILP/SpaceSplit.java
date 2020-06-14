@@ -116,11 +116,11 @@ class SubGraph{
 
 
     public void preprocess(){
-      //  get_subgraph1();
-      //  get_subgraph2();
+        get_subgraph1();
+        get_subgraph2();
         
       //  dist1=floyd(phase1_graph);
-     //   dist2=floyd(phase2_graph);
+       // dist2=floyd(phase2_graph);
         
     }
 
@@ -175,8 +175,8 @@ class SpaceSplit{
     public int [][]tmp_sg=null;
     
     ///////    Buffer Zone Size   /////////
-    private int w=3;
-    private int d=3;
+    private int w=2;
+    private int d=2;
     ///////////////////////////////////////
 
     int[][]sg=null;
@@ -628,7 +628,7 @@ class SpaceSplit{
         while(it.hasNext()){
              Vertex v1=it.next();
              int[] mid=new int[]{v1.getIX(),v1.getIY()};
-           //  double s_b_dist=subg.trueDistance(s, v1.id, phase);
+             //double s_b_dist=subg.trueDistance(s, v1.id, phase);
              double s_b_dist=manhattanDist(start, mid);
              double g_b_dist=manhattanDist(mid, goal);
              
@@ -671,7 +671,7 @@ class SpaceSplit{
         while(it.hasNext()){
              Vertex v1=it.next();
              int[] mid=new int[]{v1.getIX(),v1.getIY()};
-             //double s_b_dist=subg.trueDistance(s, v1.id, phase);
+           //  double s_b_dist=subg.trueDistance(s, v1.id, phase);
              double s_b_dist=manhattanDist(start, mid);
              double g_b_dist=manhattanDist(mid, goal);
              double dist=3*Math.max(maxDistance(s_b_dist,threshold1),maxDistance(g_b_dist, threshold2))+lambda*g_b_dist;
@@ -813,92 +813,7 @@ class SpaceSplit{
     }
 
 
-    public swappedResult swap(SubGraph subg,int [][]sg,double threshold1,double threshold2,int phase,boolean ifend,boolean advanced){   
-        swappedResult result=new swappedResult();
-        current=new int[sg[0].length];
-        Graph tmp=null;
     
-        if(phase==0){
-            tmp=subg.get_subgraph1();
-        }
-        else{
-            tmp=subg.get_subgraph2();
-        }
-        
-        List<Integer> ss=new ArrayList<Integer>();
-        List<Integer> gg=new ArrayList<Integer>();
-        
-        HashSet<Integer>hasUsed=new HashSet<Integer>();
-        HashMap<Integer,Integer> idMap=new HashMap<>();
-        result.sg[0]=new int[sg[0].length];
-        result.sg[1]=new int[sg[1].length];
-        for(int i=0;i<sg[0].length;i++){
-            int s=sg[0][i];
-            int g=sg[1][i];
-           // System.out.printf("%d--->%d\n",s,g);
-            if(tmp.idVertexMap.containsKey(s)){
-                ss.add(s);
-                gg.add(g);
-            }
-            else{
-                result.sg[0][i]=s;
-                result.sg[1][i]=g;
-            }
-            idMap.put(s,i);
-
-        }
-      //  System.out.printf("++++++++++++++++++++++Number of robots=%d,,,,,%d,,,,,,,,,,,%d\n",ss.size(),tmp.idVertexMap.size(),sg[0].length);
-        int[] vArray=sortByPaths(get_graph(), ss, gg);
-        int[] mids=new int[ss.size()];
-
-        for(int i=0;i<vArray.length;i++){
-            int vid=vArray[i];
-            int g=gg.get(vid);
-            int s=ss.get(vid);
-            int mid=-21;
-            
-            
-            if(tmp.idVertexMap.containsKey(g)){
-                mid=SubGraphAllocate(s,g,subg, hasUsed,threshold1,threshold2,phase,ifend);
-                    
-            }
-            else{
-                Graph alg=subg.get_all_graph();
-                if(alg.idVertexMap.containsKey(g)){
-                    mid=MoveOutAllocate(s,g,subg, hasUsed,threshold1,threshold2,phase,ifend);
-                }
-                else{
-                    mid=BufferZoneAllocate(s, g, subg, hasUsed, threshold1, threshold2, phase,ifend);  
-                    if(mid<0){
-                        mid=SubGraphAllocate(s,g,subg, hasUsed,threshold1,threshold2,phase,ifend);
-                    }                    
-                 }
-            }
-            mids[vid]=mid;
-            int index=idMap.get(s);
-            current[index]=mid;
-            result.sg[0][index]=mid;
-            result.sg[1][index]=g;
-           
-            
-        }
-     
-        Problem p=new Problem();
-        p.sg=new int[2][];
-        p.sg[0]=ss.stream().mapToInt(Integer::valueOf).toArray();
-        p.sg[1]=mids;
-
-        p.graph=Graph.convertGraphGT(tmp,p.sg[0],p.sg[1]);
-        
-     
-        System.out.printf("*********\n numAgents=%d\n",p.sg[0].length);
-        long []result1 =Solve.solveProblemSuboptimal(p, false, true, 0, 300.0,3, false);
-        if(result1!=null)result.T=result1[0];
-        else result.T=0;
-        System.out.printf("numAgents=%d,solved T= %d\n",ss.size(),result.T);
-  
-        return result;
-    }
 
     public swappedResult swap(SubGraph subg,int [][]sg,double threshold1,double threshold2,int phase,boolean ifend){   
         swappedResult result=new swappedResult();
@@ -920,24 +835,18 @@ class SpaceSplit{
         for(int i=0;i<sg[0].length;i++){
             int s=sg[0][i];
             int g=sg[1][i];
-            
             int mid;
-          
             if(tmp.idVertexMap.containsKey(s)){
                 ss.add(s);
-                if(tmp.idVertexMap.containsKey(g)){
-                    
-                    mid=SubGraphAllocate(s,g,subg, hasUsed,threshold1,threshold2,phase,ifend);
-                    
+                if(tmp.idVertexMap.containsKey(g)){ 
+                    mid=SubGraphAllocate(s,g,subg, hasUsed,threshold1,threshold2,phase,ifend);               
                 }
                 else{
                     Graph alg=subg.get_all_graph();
-                    if(alg.idVertexMap.containsKey(g)){
-                        
+                    if(alg.idVertexMap.containsKey(g)){  
                         mid=MoveOutAllocate(s,g,subg, hasUsed,threshold1,threshold2,phase,ifend);
                     }
                     else{
-                      
                         mid=BufferZoneAllocate(s, g, subg, hasUsed, threshold1, threshold2, phase,ifend);  
                         if(mid<0){
                             mid=SubGraphAllocate(s,g,subg, hasUsed,threshold1,threshold2,phase,ifend);
@@ -952,7 +861,6 @@ class SpaceSplit{
                 result.sg[0][i]=s;
                 current[i]=s;
             }
-           
             result.sg[1][i]=g;
         }
         //print2dArray(result.sg);
@@ -968,13 +876,168 @@ class SpaceSplit{
   //      if(p.sg[0].length==22){
   //          PathPlanner.printStartAndGoals(p.graph, p.sg[0], p.sg[1]);
    //     }
-        long []result1 =Solve.solveProblemSuboptimal(p, false, true, 0, 300.0,4, false);
+        long []result1 =Solve.solveProblemSuboptimal(p, false, true, 0, 300.0,0, false);
         if(result1!=null)result.T=result1[0];
         else result.T=0;
         System.out.printf("numAgents=%d,solved T= %d\n",ss.size(),result.T);
   
         return result;
     }
+
+    public swappedResult swapInPhases(SubGraph[] subg,int [][]sg,double threshold1,double threshold2,int phase,boolean ifend){
+        swappedResult result=new swappedResult();
+        Problem p[]=new Problem[subg.length];
+        boolean finished[]=new boolean[subg.length];
+        Graph tmp=null;
+        int []current=new int[sg[0].length];
+        result.sg[0]=new int[sg[0].length];
+        result.sg[1]=new int[sg[1].length];
+        for(int i=0;i<subg.length;i++){
+            if(phase==0){
+                tmp=subg[i].get_subgraph1();
+            }
+            else{
+                tmp=subg[i].get_subgraph2();
+            }
+            p[i]=new Problem();
+            p[i].sg=new int[2][];
+            List<Integer> ss=new ArrayList<Integer>();
+            List<Integer> gg=new ArrayList<Integer>();
+            HashSet<Integer>hasUsed=new HashSet<Integer>();
+           
+            for(int j=0;j<sg[0].length;j++){
+                int s=sg[0][j];
+                int g=sg[1][j];
+                int mid;
+                if(tmp.idVertexMap.containsKey(s)){
+                    ss.add(s);
+                    if(tmp.idVertexMap.containsKey(g)){ 
+                        mid=SubGraphAllocate(s,g,subg[i], hasUsed,threshold1,threshold2,phase,ifend);               
+                    }
+                    else{
+                        Graph alg=subg[i].get_all_graph();
+                        if(alg.idVertexMap.containsKey(g)){  
+                            mid=MoveOutAllocate(s,g,subg[i], hasUsed,threshold1,threshold2,phase,ifend);
+                        }
+                        else{
+                            mid=BufferZoneAllocate(s, g, subg[i], hasUsed, threshold1, threshold2, phase,ifend);  
+                            if(mid<0){
+                                mid=SubGraphAllocate(s,g,subg[i], hasUsed,threshold1,threshold2,phase,ifend);
+                            }                    
+                        }
+                    }
+                    gg.add(mid);
+                    current[j]=mid;
+                    result.sg[0][j]=mid;
+                }
+                result.sg[1][j]=g;
+                p[i].sg[0]=ss.stream().mapToInt(Integer::valueOf).toArray();
+                p[i].sg[1]=gg.stream().mapToInt(Integer::valueOf).toArray();
+                p[i].graph=Graph.convertGraphGT(tmp,p[i].sg[0],p[i].sg[1]);
+            }           
+        }
+        long []output=new long[subg.length];
+        for(int i = 0; i <subg.length; i ++){
+			Thread x = createThread(i,p,output,finished);
+			x.start();
+        }
+
+        boolean allDone = false;
+		while(!allDone){
+			allDone = true;
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				
+            }
+            for(int i = 0; i <subg.length; i ++){
+				if(finished[i] == false){
+					allDone = false;
+					break;
+				}
+			}
+        }
+        long maxT=0;
+        for(int i=0;i<subg.length;i++){
+            if(output[i]>maxT){maxT=output[i];}         
+        }
+        result.T=maxT;
+        
+        return result;
+    }
+
+    private Thread createThread(final int i,Problem[]p,long[] result,boolean []finished){
+		return new Thread(
+				new Runnable(){
+					@Override
+					public void run(){
+                    
+						try {
+                            long[] tmp=Solve.solveProblemSuboptimal(p[i], false, false, 0, 300, 0, false);
+                            if(tmp!=null){
+                                result[i]=tmp[0];
+                            }
+                            else{
+                                result[i]=0;
+                            }
+                          //  System.out.println("T="+result[i][0]);
+                            finished[i]=true;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					};
+				});
+    }
+    
+    public long[] parallelSortInPhases(SubGraph []subg,int [][]sg){
+        int n=subg.length;
+        long maxT=0;
+        swappedResult tmp=new swappedResult();
+        tmp.sg=new int[2][sg[0].length];
+        for(int i=0;i<2;i++){
+            for(int j=0;j<sg[0].length;j++){
+                tmp.sg[i][j]=sg[i][j];
+            }
+        }
+        long sumT=0;
+        makespanLb=getMakespanLb();
+        System.out.println("makespanLb="+makespanLb);
+        int phase=0;
+        double threshold1=makespanLb/(2.0*kSplit-1);
+        double threshold2;
+        for(int k=0;k<2*kSplit;k++){
+            maxT=0;
+            System.out.printf("Phase %d  begins\n\n\n", k);
+            phase=k%2;
+            threshold2=(1-k/(2.0*kSplit-1))*makespanLb;
+            boolean ifend=false;
+            if(k+1>=2*kSplit-1) ifend=true;
+            tmp=swapInPhases(subg, tmp.sg, threshold1, threshold2, phase, ifend);
+            maxT=tmp.T;
+           // for(int i=0;i<subg.length;i++){
+                //tmp=swap(subg[i], tmp.sg, threshold1, threshold2, phase,ifend);
+         //      tmp=swap(subg[i], tmp.sg, threshold1, threshold2, phase,ifend);
+         //       if(tmp.T>maxT) maxT=tmp.T;
+         //   }
+            
+            
+            tmp_sg=tmp.sg;
+            sumT+=maxT;
+            if(reachedGoals(tmp_sg)){
+                System.out.println("Instance solved successfully");
+                break;
+            }
+            System.out.println();
+        }
+        subMakeSpan=sumT;
+        System.out.printf("The final makespan is %d, lowerbound is %d\n",sumT,makespanLb);
+        long[] result=new long[]{sumT,0,0,0};
+        return result;
+
+    }
+
+
 
     public swappedResult swapECBS(SubGraph subg,int [][]sg,double threshold1,double threshold2,int phase,boolean ifend){   
         swappedResult result=new swappedResult();
@@ -1062,6 +1125,8 @@ class SpaceSplit{
         this.subMakeSpan=0;
     }
 
+
+
     public void parallelSort(SubGraph []subg,int [][]sg){
         int n=subg.length;
         long maxT=0;
@@ -1072,8 +1137,6 @@ class SpaceSplit{
                 tmp.sg[i][j]=sg[i][j];
             }
         }
-    
-       
         long sumT=0;
         makespanLb=getMakespanLb();
         System.out.println("makespanLb="+makespanLb);
@@ -1103,7 +1166,7 @@ class SpaceSplit{
             System.out.println();
         }
         subMakeSpan=sumT;
-        System.out.printf("The final makespan is %d\n",sumT);
+        System.out.printf("The final makespan is %d, lowerbound is %d\n",sumT,makespanLb);
        
     
         System.out.println();

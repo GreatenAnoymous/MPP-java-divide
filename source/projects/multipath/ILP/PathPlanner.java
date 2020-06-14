@@ -656,6 +656,88 @@ public class PathPlanner {
 		}
 		return middle;
 	}
+
+
+
+	public static int[] splitPathsArbitraryTT(Graph g, int start[], int goal[], boolean random,double s){
+		//Split path s:(1-s)
+
+		int middle[] = new int[start.length]; 
+		Path paths[] = PathFinder.findShortestPaths(g, start, goal);
+
+		// Sort all paths by their lengths in descending order - long paths should be processed first
+		SortedMap<Integer, Vector<Integer>> lengthIdMap = new TreeMap<Integer, Vector<Integer>>();
+		for(int i = 0; i < paths.length; i ++){
+			Vector<Integer> indexSet = lengthIdMap.get(-paths[i].vertexList.size());
+			if(indexSet == null){
+				indexSet = new Vector<Integer>();
+				lengthIdMap.put(-paths[i].vertexList.size(), indexSet);
+			}
+			indexSet.add(i);
+		}
+		Integer[] keyArray = lengthIdMap.keySet().toArray(new Integer[0]);
+		int[] vArray = new int[paths.length];
+		int vIndex = 0;
+		for(int i = 0; i < keyArray.length; i ++){
+			Integer[] indexArray = lengthIdMap.get(keyArray[i]).toArray(new Integer[0]);
+			for(int in = 0; in < indexArray.length; in ++){
+				vArray[vIndex++] = indexArray[in];
+			}
+		}
+		int threshold=(int)(paths[vArray[0]].vertexList.size()*s);
+		
+
+		System.out.println("threshold="+threshold);
+		Set<Integer> usedVertexSet = new HashSet<Integer>();
+		for(int i = 0; i < paths.length; i ++){
+			// Find an intermediate goal that's about halfway
+			int di=paths[vArray[i]].vertexList.size()-1;
+            int dMin1 =Math.min(threshold,di);
+            int dMax1=Math.min(threshold,di);
+			int dMin2=di-dMin1;
+			int dMax2=di-dMax1;
+			
+			boolean foundVertex = false;
+			boolean flipped = true;
+			while(!foundVertex){
+				Set<Integer> fromStartSet = PathFinder.findGoalsInDistanceRange(g, start[vArray[i]], dMin1, dMax1);
+				Set<Integer> fromGoalSet = PathFinder.findGoalsInDistanceRange(g, goal[vArray[i]],dMin2,dMax2);
+				// Find intersection
+				Set<Integer> iSet = new HashSet<Integer>();
+				for(int v: fromStartSet){
+					if(fromGoalSet.contains(v)){
+						iSet.add(v);
+						
+					}
+				}	
+			////	System.out.print(iSet.size()+"--- ");			
+				// Need some vertex not in usedVertexSet
+				for(int v: iSet){
+					if(!usedVertexSet.contains(v)){
+					//	System.out.println(dMin1+" "+dMin2+" "+dMax1+" "+dMax2);
+						middle[vArray[i]] = v;
+						usedVertexSet.add(v);
+						foundVertex = true;
+						break;
+					}
+				}			
+				if(!foundVertex){
+				//	System.out.println("Flipped!");
+					if(flipped){
+						dMin1 -= 1;
+						dMax2+=1;
+						if(dMin1 < 0){dMin1 = 0;}
+					}
+					else{
+						dMax1 += 1;
+						dMin2-=1;
+					}
+					flipped = !flipped;
+				}
+			}
+		}
+		return middle;
+	}
 	
 	public static int[] splitPaths(Graph g, int start[], int goal[], boolean random){
 		int middle[] = new int[start.length]; 
@@ -838,16 +920,7 @@ public class PathPlanner {
 			threshold=sum/(2*paths.length);
 		}
 		System.out.println("threshold="+threshold);
-		/*
-        for(int i=0;i<paths.length;i++){
-            int di=paths[vArray[i]].vertexList.size();
-            int dMin1 =Math.min(threshold,di);
-            int dMax1=Math.min(threshold,di);
-            int dMin2 =di-dMin1; 
-            int dMax2 =di-dMax1; 
-            System.out.println(paths[vArray[i]].vertexList.size()+" "+dMin1+" "+dMin2);
- 
-        }*/
+
         for(int i = 0; i < paths.length; i ++){
             int di=paths[vArray[i]].vertexList.size();
             int dMin1 =Math.min(threshold,di);
@@ -1492,7 +1565,66 @@ public class PathPlanner {
 		return allPaths;
 	}
 	
+	protected int[][] multiThreadedSplitPlanningArbitraryTT(Graph g, int start[], int goal[], double timeLimit, double [] ratio){
+		mg = g;
+		mtime = timeLimit;
+		mpieces = ratio.length;
+		msg = new int[mpieces + 1][start.length];
+		mdone = new boolean[mpieces];
+		for(int i = 0;i < start.length; i ++){
+			msg[0][i] = start[i];
+			msg[mpieces][i] = goal[i];
+		}
+		int [] tmp=start;
+		
+		for(int i = 0; i < mpieces-1; i ++){
+			double sum=0,s,ss=0;
+			for(int k=i;k<ratio.length;k++){
+				sum+=ratio[k];
+				if(k<=i)ss+=ratio[k];
+			}
+			
+			s=ratio[i]/sum;
+			System.out.println("s="+s);
+			//int[] middle = splitPathsArbitraryTT(g, tmp,goal, false,s);
+			int[] middle = splitPathsArbitrary(g, tmp,goal, false,s);
+			for(int a = 0; a < start.length; a ++){
+				msg[i+1][a] = middle[a];
+			}
+			tmp=middle;
+		}
+		for(int i = 0; i < mpieces; i ++){
+			Thread x = createThreadTT(i);
+			x.start();
+		}
+		
+		// Wait for work to finish
+		boolean allDone = false;
+		while(!allDone){
+			allDone = true;
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for(int i = 0; i < mpieces; i ++){
+				if(mdone[i] == false){
+					allDone = false;
+					break;
+				}
+			}
+		}
+		
+		// All done, piece together the paths
+		int[][] allPaths = (int[][])(mpath.get(0));
+		for(int i = 1;i < mpieces; i ++){
+			allPaths = mergePaths(allPaths, (int[][])(mpath.get(i)));
+		}
 
+		
+		return allPaths;
+	}
 
 	private Thread createThread(final int i){
 		return new Thread(
