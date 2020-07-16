@@ -115,6 +115,9 @@ plt.legend(handles=[l0,l1,l2,l3,l4],labels=['16s8t-4x2','16s8t-4x4','16s8t-6x3',
 plt.show()
 ################################################################################################
 
+
+
+'''
 numAgents=np.arange(100,500,100)
 meanTimeECBS=[]
 meanTimeECBS2t=[]
@@ -248,3 +251,4 @@ plt.xlabel(r'Number of Agents in 128 $\times$ 128 grid')
 plt.ylabel('Suboptimality')
 plt.legend(handles=[l0,l1,l2,l3],labels=['ecbs-4s8t','ecbs','ecbs-8t','ILP-4s8t'])
 plt.show()
+'''

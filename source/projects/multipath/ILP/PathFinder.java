@@ -125,6 +125,7 @@ public class PathFinder {
 		Path[] paths = new Path[start.length];
 		for (int i = 0; i < paths.length; i++) {
 			paths[i] = findOneShortestPath(g, start[i], goal[i], null);
+			//if(paths[i]==null) throw new Error();
 		}
 		return paths;
 	}
@@ -361,16 +362,21 @@ public class PathFinder {
 	}
 	
 	public static int getMakespanLowerBound(Graph g, int start[], int goal[]){
+		try{
+			Path[] hp = PathFinder.findShortestPaths(g, start, goal);
 	
-		Path[] hp = PathFinder.findShortestPaths(g, start, goal);
-		
-		int makespanLb = 0;
-		for(int i = 0; i < hp.length; i ++){
-			if(hp[i].vertexList.size() > makespanLb){
-				makespanLb = hp[i].vertexList.size();
+			int makespanLb = 0;
+			for(int i = 0; i < hp.length; i ++){
+				if(hp[i].vertexList.size() > makespanLb){
+					makespanLb = hp[i].vertexList.size();
+				}
 			}
+			return makespanLb;
 		}
-		return makespanLb;
+		catch(Exception e){
+			return -1;
+		}
+		
 		
 	}
 

@@ -66,8 +66,12 @@ const_name="random-32-32-10-random.txt"
 plt.figure()
 plt.ylim(0, 150)
 plt.xlim(0,105)
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Computation Time (s)')
+plt.xlabel('Number of Robots (N)',fontsize=18)
+plt.ylabel('Computation Time (s)',fontsize=18)
+font1 = {'family' : 'Serif',
+'weight' : 'normal',
+'size'   : 16,
+}
 fname="./2t-tt/"+const_name
 runtime2t_tt,opt2t_tt=get_runtime_optimality(fname)
 l0,=plt.plot(get_num_agents(fname),runtime2t_tt,marker='o',color='blue')
@@ -89,15 +93,16 @@ l5,=plt.plot(get_num_agents(fname),runtime4t_tt_old,marker='x',color='black')
 fname="./ILP-tt/"+const_name
 runtimeILP,opt_ILP=get_runtime_optimality(fname)
 l6,=plt.plot(get_num_agents(fname),runtimeILP,marker=5,color='purple')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5,l6],labels=['ILP-2t-tt','ILP-2t-mk','ILP-3t-tt','ILP-3t-mk','ILP-4t-tt','ILP-4t-mk','ILP-tt'])
+plt.tick_params(labelsize=16)
+plt.legend(handles=[l0,l1,l2,l3,l4,l5,l6],labels=['ILP-2t-tt','ILP-2t-mk','ILP-3t-tt','ILP-3t-mk','ILP-4t-tt','ILP-4t-mk','ILP-tt'],prop=font1)
 plt.savefig("comparison-old-runtime-flowtime.pdf", bbox_inches="tight", pad_inches=0.05)
 
 plt.show()
 
 
 plt.figure()
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Optimality Ratio')
+plt.xlabel('Number of Robots (N)',fontsize=18)
+plt.ylabel('Optimality Ratio',fontsize=18)
 plt.xlim(0,105)
 fname="./2t-tt/"+const_name
 runtime2t_tt,opt2t_tt=get_runtime_optimality(fname)
@@ -120,8 +125,9 @@ l5,=plt.plot(get_num_agents(fname),opt4t_tt_old,marker='x',color='black')
 fname="./ILP-tt/"+const_name
 runtimeILP,opt_ILP=get_runtime_optimality(fname)
 l6,=plt.plot(get_num_agents(fname),opt_ILP,marker=5,color='purple')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5,l6],labels=['ILP-2t-tt','ILP-2t-mk','ILP-3t-tt','ILP-3t-mk','ILP-4t-tt','ILP-4t-mk','ILP-tt'],loc = 'upper left')
-plt.savefig("comparison-old-opt-flowtime.pdf", bbox_inches="tight", pad_inches=0.05)
+plt.tick_params(labelsize=14)
+#plt.legend(handles=[l0,l1,l2,l3,l4,l5,l6],labels=['ILP-2t-tt','ILP-2t-mk','ILP-3t-tt','ILP-3t-mk','ILP-4t-tt','ILP-4t-mk','ILP-tt'],loc = 'upper left')
+plt.savefig("comparison-old-opt-flowtime.pdf",bbox_inches="tight", pad_inches=0.05)
 plt.show()
 
 plt.figure()

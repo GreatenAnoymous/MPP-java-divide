@@ -3,9 +3,9 @@
 THE_CLASSPATH=".;c:/gurobi811/win64/lib/gurobi.jar;C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/lib/snakeyaml-1.23.jar"
 #PROGRAM_NAME=Main.java
 
-mapname="C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-64-64-00.map"
-scename="C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/scenarios/random-64-64-00-random-"
-result="C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/result/64x64/16t/random-64-64-00-random.txt"
+mapname="C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-120-120-05.map"
+scename="C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/scenarios/random-120-120-05-random-"
+result="C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/result/120x120/4s8t/random-120-120-05-random-new.txt"
 #cd projects/multipath/ILP
 
 javac -classpath ${THE_CLASSPATH} *.java ../advanced/*.java ../ECBS/*.java

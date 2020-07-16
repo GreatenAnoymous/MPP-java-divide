@@ -4,7 +4,18 @@ import statistics
 import os
 import pandas as pd
 
-
+font1 = {'family' : 'Serif',
+'weight' : 'normal',
+'size'   : 16,
+}
+def set_title(option):
+	if option=="runtime":
+		plt.xlabel('Number of Robots (N)',fontsize=18)
+		plt.ylabel('Computation Time (s)',fontsize=18)
+	else:
+		plt.xlabel('Number of Robots (N)',fontsize=18)
+		plt.ylabel('Optimality Ratio',fontsize=18)
+	plt.tick_params(labelsize=16)
 
 def read_data(filename,num):
 	rawData=np.loadtxt(filename)
@@ -60,8 +71,9 @@ def get_runtime_optimality(filename):
 	opt=[]
 	for a in numAgents:
 		tmp=read_data(filename,a)
+		tmp1=read_data(filename,a)
 		rt.append(tmp['runtime'])
-		opt.append(tmp['OptimalRatio'])
+		opt.append(tmp1['OptimalRatio'])
 	return np.array(rt)/1000.,opt
 	
 def get_success_rate(filename,timeLimit):
@@ -79,41 +91,51 @@ const_name="brc202d-random.txt"
 #######################################################
 plt.figure()
 plt.ylim(0, 300)
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Computation Time(s)')
+set_title("runtime")
 fname="./ecbs/"+const_name
 runtime,opt=get_runtime_optimality(fname)
 l0,=plt.plot(get_num_agents(fname),runtime,marker='o',color='blue')
 fname="./ecbs-2t/"+const_name
 runtime2t,opt2t=get_runtime_optimality(fname)
 l1,=plt.plot(get_num_agents(fname),runtime2t,marker='s',color='red')
+fname="./ecbs-3t/"+const_name
+runtime3t,opt3t=get_runtime_optimality(fname)
+l2,=plt.plot(get_num_agents(fname),runtime3t,marker='D',color='green')
 fname="./ecbs-4t/"+const_name
 runtime4t,opt4t=get_runtime_optimality(fname)
-l2,=plt.plot(get_num_agents(fname),runtime4t,marker='D',color='green')
-fname="./ecbs-8t/"+const_name
-runtime8t,opt8t=get_runtime_optimality(fname)
-l3,=plt.plot(get_num_agents(fname),runtime8t,marker='x',color='orange')
-plt.legend(handles=[l0,l1,l2,l3],labels=['ecbs','ecbs-2t','ecbs-4t','ecbs-8t'])
+l3,=plt.plot(get_num_agents(fname),runtime4t,marker='x',color='orange')
+fname="./ecbs-5t/"+const_name
+runtime5t,opt5t=get_runtime_optimality(fname)
+l4,=plt.plot(get_num_agents(fname),runtime5t,marker=5,color='purple')
+fname="./ecbs-6t/"+const_name
+runtime4t,opt4t=get_runtime_optimality(fname)
+l5,=plt.plot(get_num_agents(fname),runtime4t,marker=6,color='pink')
+plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ecbs','ecbs-2t','ecbs-3t','ecbs-4t','ecbs-5t','ecbs-6t'],prop=font1)
 plt.savefig("brc202d_runtime.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 
 
 plt.figure()
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Optimality Ratio')
+set_title("optimality")
 fname="./ecbs/"+const_name
 runtime,opt=get_runtime_optimality(fname)
 l0,=plt.plot(get_num_agents(fname),opt,marker='o',color='blue')
 fname="./ecbs-2t/"+const_name
 runtime2t,opt2t=get_runtime_optimality(fname)
 l1,=plt.plot(get_num_agents(fname),opt2t,marker='s',color='red')
+fname="./ecbs-3t/"+const_name
+runtime3t,opt3t=get_runtime_optimality(fname)
+l2,=plt.plot(get_num_agents(fname),opt3t,marker='D',color='green')
 fname="./ecbs-4t/"+const_name
 runtime4t,opt4t=get_runtime_optimality(fname)
-l2,=plt.plot(get_num_agents(fname),opt4t,marker='D',color='green')
-fname="./ecbs-8t/"+const_name
-runtime8t,opt8t=get_runtime_optimality(fname)
-l3,=plt.plot(get_num_agents(fname),opt8t,marker='x',color='orange')
-plt.legend(handles=[l0,l1,l2,l3],labels=['ecbs','ecbs-2t','ecbs-4t','ecbs-8t'])
+l3,=plt.plot(get_num_agents(fname),opt4t,marker='x',color='orange')
+fname="./ecbs-5t/"+const_name
+runtime5t,opt5t=get_runtime_optimality(fname)
+l4,=plt.plot(get_num_agents(fname),opt5t,marker=5,color='purple')
+fname="./ecbs-6t/"+const_name
+runtime6t,opt6t=get_runtime_optimality(fname)
+l5,=plt.plot(get_num_agents(fname),opt6t,marker=6,color='pink')
+#plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ecbs','ecbs-2t','ecbs-3t','ecbs-4t','ecbs-5t','ecbs-6t'])
 plt.savefig("brc202d_opt.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 
@@ -197,5 +219,4 @@ l2,=plt.plot(get_num_agents(fname),sr212,marker='D',color='green')
 plt.legend(handles=[l0,l1,l2],labels=['ILP','111-split','212-split'])
 plt.show()
 ##########################################################################################
-
 '''

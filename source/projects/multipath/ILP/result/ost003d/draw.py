@@ -4,6 +4,18 @@ import statistics
 import os
 import pandas as pd
 
+font1 = {'family' : 'Serif',
+'weight' : 'normal',
+'size'   : 16,
+}
+def set_title(option):
+	if option=="runtime":
+		plt.xlabel('Number of Robots (N)',fontsize=18)
+		plt.ylabel('Computation Time (s)',fontsize=18)
+	else:
+		plt.xlabel('Number of Robots (N)',fontsize=18)
+		plt.ylabel('Optimality Ratio',fontsize=18)
+	plt.tick_params(labelsize=16)
 
 
 def read_data(filename,num):
@@ -80,8 +92,7 @@ const_name="ost003d-random.txt"
 #######################################################
 plt.figure()
 plt.ylim(0, 300)
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Computation Time (s)')
+set_title("runtime")
 fname="./ecbs/"+const_name
 runtime,opt=get_runtime_optimality(fname)
 l0,=plt.plot(get_num_agents(fname),runtime,marker='o',color='blue')
@@ -100,14 +111,13 @@ l4,=plt.plot(get_num_agents(fname),runtime5t,marker=5,color='purple')
 fname="./ecbs-6t/"+const_name
 runtime4t,opt4t=get_runtime_optimality(fname)
 l5,=plt.plot(get_num_agents(fname),runtime4t,marker=6,color='pink')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ecbs','ecbs-2t','ecbs-3t','ecbs-4t','ecbs-5t','ecbs-6t'])
+plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ecbs','ecbs-2t','ecbs-3t','ecbs-4t','ecbs-5t','ecbs-6t'],prop=font1)
 plt.savefig("ost003d_runtime.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 
 
 plt.figure()
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Optimality Ratio')
+set_title("optimality")
 fname="./ecbs/"+const_name
 runtime,opt=get_runtime_optimality(fname)
 l0,=plt.plot(get_num_agents(fname),opt,marker='o',color='blue')
@@ -126,7 +136,7 @@ l4,=plt.plot(get_num_agents(fname),opt5t,marker=5,color='purple')
 fname="./ecbs-6t/"+const_name
 runtime6t,opt6t=get_runtime_optimality(fname)
 l5,=plt.plot(get_num_agents(fname),opt6t,marker=6,color='pink')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ecbs','ecbs-2t','ecbs-3t','ecbs-4t','ecbs-5t','ecbs-6t'])
+#plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ecbs','ecbs-2t','ecbs-3t','ecbs-4t','ecbs-5t','ecbs-6t'])
 plt.savefig("ost003d_opt.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 

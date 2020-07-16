@@ -156,7 +156,8 @@ class SpaceSplit{
     int rows;
     int cols;
     int numAgents;
-    int kSplit=0;
+    int kSplitX=0;
+    int kSplitY=0;
 
     int n=0;
 
@@ -227,8 +228,9 @@ class SpaceSplit{
     }
 
     private int [] getSubGraphLabel(int id){
-        int y=id%kSplit;
-        int x=id/kSplit;
+        int y=id%kSplitY;
+        int x=id/kSplitY;
+        //System.out.println("id="+id+",("+x+","+y+")");
         return new int[]{x,y};
     }
 
@@ -311,27 +313,25 @@ class SpaceSplit{
         y=(int)(vid%(rows));
         return new int[]{x,y};
     }
-
+/*
     public SpaceSplit(int rows,int cols,int numAgents,int kSplit){
         this.rows=rows;
         this.cols=cols;
         this.numAgents=numAgents;
         this.kSplit=kSplit;
        // paths=new int[numAgents][4];
-    }
+    }*/
 
-    public SpaceSplit(Problem p,int kSplit){
+    public SpaceSplit(Problem p,int kSplitX,int kSplitY){
         this.rows=p.graph.rows;
         this.cols=p.graph.columns;
         //this.numAgents=p.sg[0].length;
-        this.kSplit=kSplit;
+        this.kSplitX=kSplitX;
+        this.kSplitY=kSplitY;
         this.sg=p.sg;
-        this.set_block_size(2,2);
+        this.set_block_size(4,4);
         get_obstacles(p.graph);
         this.getSubGraphs();
-        
-    
-       // paths=new int[numAgents][4];
     }
 
     public boolean reachedGoals(int[][] startAndgoals){
@@ -592,7 +592,7 @@ class SpaceSplit{
             // double s_b_dist=subg.trueDistance(s, v1.id, phase);
              double s_b_dist=manhattanDist(start, mid);
              double g_b_dist=manhattanDist(mid, goal);
-             double dist=Math.max(maxDistance(s_b_dist,threshold1),maxDistance(g_b_dist, threshold2))+lambda*g_b_dist;
+             double dist=Math.max(maxDistance(s_b_dist,threshold1),maxDistance(g_b_dist, threshold2))+lambda*g_b_dist+10*Graph.localDensity(tmp, v1.id, hasUsed);;
              if(dist<min_dist){
                  if(hasUsed.contains(v1.id)==false){
                      cur_id=v1.id;
@@ -632,7 +632,7 @@ class SpaceSplit{
              double s_b_dist=manhattanDist(start, mid);
              double g_b_dist=manhattanDist(mid, goal);
              
-             double dist=Math.max(maxDistance(s_b_dist,threshold1),maxDistance(g_b_dist, threshold2))+1.1*g_b_dist;
+             double dist=Math.max(maxDistance(s_b_dist,threshold1),maxDistance(g_b_dist, threshold2))+1.1*g_b_dist+10*Graph.localDensity(tmp, v1.id, hasUsed);;
              if(dist<min_dist){
                  if(hasUsed.contains(v1.id)==false){
                      cur_id=v1.id;
@@ -652,6 +652,7 @@ class SpaceSplit{
         Graph bf=null;
         //System.out.println("What the fuck");
         int action=decideDirection(subgraphs, s, g, phase);
+       
         double lambda=0.1;
         if(ifend==true)lambda=5.0;
         if(phase==0){
@@ -674,7 +675,7 @@ class SpaceSplit{
            //  double s_b_dist=subg.trueDistance(s, v1.id, phase);
              double s_b_dist=manhattanDist(start, mid);
              double g_b_dist=manhattanDist(mid, goal);
-             double dist=3*Math.max(maxDistance(s_b_dist,threshold1),maxDistance(g_b_dist, threshold2))+lambda*g_b_dist;
+             double dist=3*Math.max(maxDistance(s_b_dist,threshold1),maxDistance(g_b_dist, threshold2))+lambda*g_b_dist+10*Graph.localDensity(tmp, v1.id, hasUsed);
              if(dist<min_dist){
                  if(hasUsed.contains(v1.id)==false){
                      cur_id=v1.id;
@@ -699,10 +700,10 @@ class SpaceSplit{
         int k=0;
         
         List<SubGraph> tmp_subg=new ArrayList<SubGraph>();
-        int di=cols/kSplit;
-        int dj=rows/kSplit;
-        for(int i=0;i<kSplit;i++){
-            for(int j=0;j<kSplit;j++){
+        int di=cols/kSplitX;
+        int dj=rows/kSplitY;
+        for(int i=0;i<kSplitX;i++){
+            for(int j=0;j<kSplitY;j++){
                 int left=i*di;
                 int right=Math.min(left+di,cols);
                 int down=j*dj;
@@ -726,10 +727,6 @@ class SpaceSplit{
         Graph tmp;
         int []vs=get_vertex(s);
         int []vg=get_vertex(g);
-        
-     //   System.out.println("start="+s+"("+vs[0]+","+vs[1]+")"+" goal="+g+"("+vg[0]+","+vg[1]+")");
-
-        
         
         for(int i=0;i<subg.length;i++){
             if(phase==0){
@@ -756,7 +753,7 @@ class SpaceSplit{
             throw new OutOfMemoryError("goal");
         }
         
-        
+    
         double dx=goal[0]-start[0]+1.0/cols*(vg[0]-vs[0]);
         double dy=goal[1]-start[1]+1.0/cols*(vg[1]-vs[1]);
         if(Math.abs(dx)>Math.abs(dy)){
@@ -876,13 +873,15 @@ class SpaceSplit{
   //      if(p.sg[0].length==22){
   //          PathPlanner.printStartAndGoals(p.graph, p.sg[0], p.sg[1]);
    //     }
-        long []result1 =Solve.solveProblemSuboptimal(p, false, true, 0, 300.0,0, false);
+        long []result1 =Solve.solveProblemSuboptimal(p, false, false, 0, 300.0,3, false);
         if(result1!=null)result.T=result1[0];
         else result.T=0;
         System.out.printf("numAgents=%d,solved T= %d\n",ss.size(),result.T);
   
         return result;
     }
+
+    List<Problem[]> ppthreads=null;
 
     public swappedResult swapInPhases(SubGraph[] subg,int [][]sg,double threshold1,double threshold2,int phase,boolean ifend){
         swappedResult result=new swappedResult();
@@ -936,12 +935,18 @@ class SpaceSplit{
                 p[i].graph=Graph.convertGraphGT(tmp,p[i].sg[0],p[i].sg[1]);
             }           
         }
-        long []output=new long[subg.length];
-        for(int i = 0; i <subg.length; i ++){
-			Thread x = createThread(i,p,output,finished);
-			x.start();
-        }
 
+        ppthreads.add(p);
+        /*
+        long []output=new long[subg.length];
+        List <Thread> ttmp=new ArrayList<>();
+        for(int i = 0; i <subg.length; i ++){
+            Thread x = createThread(i,p,output,finished);
+            ttmp.add(x);
+			//x.start();
+        }
+        ppthreads.add(ttmp);
+        /*
         boolean allDone = false;
 		while(!allDone){
 			allDone = true;
@@ -963,26 +968,26 @@ class SpaceSplit{
             if(output[i]>maxT){maxT=output[i];}         
         }
         result.T=maxT;
-        
+        */
         return result;
     }
 
-    private Thread createThread(final int i,Problem[]p,long[] result,boolean []finished){
+    private Thread createThread(final int i,final int j,List<Problem[]>pp,long[][] result,boolean [][]finished){
 		return new Thread(
 				new Runnable(){
 					@Override
 					public void run(){
                     
 						try {
-                            long[] tmp=Solve.solveProblemSuboptimal(p[i], false, false, 0, 300, 0, false);
+                            long[] tmp=Solve.solveProblemSuboptimal((pp.get(i))[j], false, false, 0, 300, 0, false);
                             if(tmp!=null){
-                                result[i]=tmp[0];
+                                result[i][j]=tmp[0];
                             }
                             else{
-                                result[i]=0;
+                                result[i][j]=0;
                             }
                           //  System.out.println("T="+result[i][0]);
-                            finished[i]=true;
+                            finished[i][j]=true;
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -991,6 +996,7 @@ class SpaceSplit{
     }
     
     public long[] parallelSortInPhases(SubGraph []subg,int [][]sg){
+        ppthreads=new ArrayList<>();
         int n=subg.length;
         long maxT=0;
         swappedResult tmp=new swappedResult();
@@ -1004,31 +1010,60 @@ class SpaceSplit{
         makespanLb=getMakespanLb();
         System.out.println("makespanLb="+makespanLb);
         int phase=0;
-        double threshold1=makespanLb/(2.0*kSplit-1);
+        double threshold1=makespanLb/(kSplitX+kSplitY-1);
         double threshold2;
-        for(int k=0;k<2*kSplit;k++){
+        for(int k=0;k<kSplitX+kSplitY;k++){
             maxT=0;
             System.out.printf("Phase %d  begins\n\n\n", k);
             phase=k%2;
-            threshold2=(1-k/(2.0*kSplit-1))*makespanLb;
+            threshold2=(1-k/(kSplitX+kSplitY-1))*makespanLb;
             boolean ifend=false;
-            if(k+1>=2*kSplit-1) ifend=true;
+            if(k+1>=kSplitX+kSplitY-1) ifend=true;
             tmp=swapInPhases(subg, tmp.sg, threshold1, threshold2, phase, ifend);
-            maxT=tmp.T;
-           // for(int i=0;i<subg.length;i++){
-                //tmp=swap(subg[i], tmp.sg, threshold1, threshold2, phase,ifend);
-         //      tmp=swap(subg[i], tmp.sg, threshold1, threshold2, phase,ifend);
-         //       if(tmp.T>maxT) maxT=tmp.T;
-         //   }
-            
-            
+           // maxT=tmp.T;   
             tmp_sg=tmp.sg;
-            sumT+=maxT;
+           // sumT+=maxT;
             if(reachedGoals(tmp_sg)){
                 System.out.println("Instance solved successfully");
                 break;
             }
-            System.out.println();
+           
+        }
+        boolean [][]finished=new boolean[ppthreads.size()][subg.length];
+        long[][]output=new long[ppthreads.size()][subg.length];
+       // System.out.println(ppthreads.size());
+       // System.exit(0);
+        for(int i=0;i<ppthreads.size();i++){
+            for(int j=0;j<ppthreads.get(i).length;j++){
+                Thread x=createThread(i,j, ppthreads, output, finished);
+                x.start();
+            }
+        }
+
+        boolean allDone = false;
+		while(!allDone){
+			allDone = true;
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				
+            }
+            for(int i = 0; i <ppthreads.size(); i ++){
+                for(int j=0;j<subg.length;j++)
+				    if(finished[i][j] == false){
+					    allDone = false;
+					    break;
+				    }
+			}
+        }
+        sumT=0;
+        for(int i=0;i<ppthreads.size();i++){
+            maxT=0;
+            for(int j=0;j<subg.length;j++){
+                if(output[i][j]>maxT)maxT=output[i][j];
+            }
+            sumT+=maxT;
         }
         subMakeSpan=sumT;
         System.out.printf("The final makespan is %d, lowerbound is %d\n",sumT,makespanLb);
@@ -1036,6 +1071,8 @@ class SpaceSplit{
         return result;
 
     }
+
+    
 
 
 
@@ -1112,7 +1149,7 @@ class SpaceSplit{
         }
         
       
-        long []result1=(new Ecbs()).ECBS_solve_suboptimal(p,3);
+        long []result1=(new Ecbs()).ECBS_solve_suboptimal(p,0);
         if(result1!=null)result.T=result1[0];
         else result.T=0;
         System.out.printf("numAgents=%d,solved T= %d\n",ss.size(),result.T);
@@ -1127,7 +1164,7 @@ class SpaceSplit{
 
 
 
-    public void parallelSort(SubGraph []subg,int [][]sg){
+    public long[] parallelSort(SubGraph []subg,int [][]sg){
         int n=subg.length;
         long maxT=0;
         swappedResult tmp=new swappedResult();
@@ -1141,17 +1178,17 @@ class SpaceSplit{
         makespanLb=getMakespanLb();
         System.out.println("makespanLb="+makespanLb);
         int phase=0;
-        double threshold1=makespanLb/(2.0*kSplit-1);
+        double threshold1=makespanLb/(kSplitX+kSplitY-1);
         double threshold2;
-        for(int k=0;k<2*kSplit;k++){
+        for(int k=0;k<kSplitX+kSplitY;k++){
             maxT=0;
             System.out.printf("Phase %d  begins\n\n\n", k);
             phase=k%2;
-            threshold2=(1-k/(2.0*kSplit-1))*makespanLb;
+            threshold2=(1-k/(kSplitX+kSplitY-1))*makespanLb;
             boolean ifend=false;
-            if(k+1>=2*kSplit-1) ifend=true;
+            if(k+1>=kSplitX+kSplitY-1) ifend=true;
             for(int i=0;i<subg.length;i++){
-                //tmp=swap(subg[i], tmp.sg, threshold1, threshold2, phase,ifend);
+               // tmp=swapECBS(subg[i], tmp.sg, threshold1, threshold2, phase,ifend);
                tmp=swap(subg[i], tmp.sg, threshold1, threshold2, phase,ifend);
                 if(tmp.T>maxT) maxT=tmp.T;
             }
@@ -1170,6 +1207,8 @@ class SpaceSplit{
        
     
         System.out.println();
+        long[] result=new long[]{sumT,0,0,0};
+        return result;
     }
     
 

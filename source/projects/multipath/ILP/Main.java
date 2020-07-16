@@ -13,7 +13,7 @@ import projects.multipath.advanced.Problem;
 import projects.multipath.advanced.yamlProblem;
 
 import projects.multipath.ECBS.*;
-
+import gurobi.GRBException;
 import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.lang.reflect.Array;
@@ -36,44 +36,61 @@ public class Main {
 		switch (option){
 			case 0:
 				
-				p=Problem.createGridProblem(64,64,0.00,10);
-				yamlProblem.SaveMap(p.graph,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-64-64-00.map");
+				p=Problem.createGridProblem(120,120,0.05,10);
+				yamlProblem.SaveMap(p.graph,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-120-120-05.map");
 				//System.exit(0);
 				for(int i=1;i<=25;i++){
-					p.graph=Graph.readMap("C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-64-64-00.map");
-					p.sg=Graph.getRandomStartGoalMany(p.graph,800);
-					yamlProblem.saveScenario(p,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/scenarios/random-64-64-00-random-"+i+".scen");
+					p.graph=Graph.readMap("C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/maps/random-120-120-05.map");
+					p.sg=Graph.getRandomStartGoalMany(p.graph,4000);
+					yamlProblem.saveScenario(p,"C:/work/cs560/MPP-java-divide/source/projects/multipath/ILP/maps/scenarios/random-120-120-05-random-"+i+".scen");
 				}
 				break;
 			case 1:
 				//p=Problem.createGridProblem(100,100,0.00,2000);
 				p.graph=Graph.readMap(mapname);
 				p.sg=null;
-				int splits=Integer.parseInt(argv[4]);
+				//int splits=Integer.parseInt(argv[4]);
 				//p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
-				//SpaceSplit test=new SpaceSplit(p,4);
-		//		System.out.println("Ready");
+				SpaceSplit test=new SpaceSplit(p,2,2);
+				System.out.println("Ready");
 				//p.graph=Graph.readMap(mapname);
-				for(int k=20;k<=300;k+=20){
+				for(int k=1200;k<=1200;k+=100){
 					numAgents=k;
-					for(int i=1;i<=25;i++){
+					for(int i=1;i<=10;i++){
 						String filename=scename+String.valueOf(i)+".scen";
-						p.graph=Graph.readMap(mapname);
+						//p.graph=Graph.readMap(mapname);
 				 		System.out.println("rows="+p.graph.rows+" cols="+p.graph.columns);
 						p.sg=Graph.readScenario(filename,numAgents);
 						//PathPlanner.printStartAndGoals(p.graph, p.sg[0], p.sg[1]);
 						//Solve.checkValid(p.graph, p.sg[0], p.sg[1]);
-						//test.sg=p.sg;
+						test.sg=p.sg;
 						long t1=System.currentTimeMillis();
 						//p.graph=Graph.convertGraphGT(p.graph,p.sg[0],p.sg[1]);
 						//long[] re=Solve.solveProblemArbitrarySplitTT(p, false,false, 0, 300,false,new double[]{1,1,1});
-					//	long [] re=test.parallelSortInPhases(test.subgraphs, test.sg);
 						
-						long[] re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 4,false);
+						long [] re=null;
+						try{
+							re=test.parallelSort(test.subgraphs, test.sg);
+						}
+						catch(Exception e){
+							
+							System.out.println("Time out!");
+							continue;
+						}
+					//	long [] re=null;
+					//	try{
+					//		re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 1,false);
+					//	}
+					//	catch(Exception e){
+					//		System.out.println("Out of memory Error!");
+					//		re=null;
+					//	}
+						//long [] re=test.parallelSortInPhases(test.subgraphs, test.sg);
+						//long[] re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 2,false);
 					//	long[] re=Solve.solveProblemSuboptimal(p, false,false, 0, 300, 0,false);
-						//long[] re=Ksplit.solveProblemSuboptimal(p, false,false, 0, 300, 3,false);
-					//	long[] re=Solve.solveProblemArbitrarySplit(p, false,false, 0, 300,false,new double[]{1,1,1,1,1,1});
-					//	long[] re=(new Ecbs()).ECBS_solve_arbitrary(p, new double[]{1,1},false);
+						//long[] re=Ksplit.solveProblemSuboptimal(p, false,false, 0, 300, 5,false);
+						//long[] re=Solve.solveProblemArbitrarySplit(p, false,false, 0, 300,false,new double[]{1,1,1});
+						//long[] re=(new Ecbs()).ECBS_solve_arbitrary(p, new double[]{1,1,1,1},false);
 					//    long[] re=(new Ecbs()).ECBS_solve_arbitraryTT(p, new double[]{1,1,1,1},false);
 					//	long[] re=Solve.solveProblem(p, false, 300);
 					//	long[] re=(new Ecbs()).ECBS_solve_suboptimalTT(p, 2,false);
@@ -90,11 +107,12 @@ public class Main {
 							//re[3]=PathFinder.getTotalTimeLowerBound(p.graph, p.sg[0], p.sg[1]);
 							re[3]=PathFinder.getMakespanLowerBound(p.graph, p.sg[0], p.sg[1])-1;
 							System.out.printf("runtime=%f,%d %d\n",(t2-t1)/1000.,re[0],re[3]);
+							yamlProblem.saveOutPut(p,re,toStore);
 							
 						}
 						//long[] re=new long[]{test.subMakeSpan,t2-t1,0,test.makespanLb}						
 						//System.exit(0);
-						yamlProblem.saveOutPut(p,re,toStore);
+						
 						
 					
 					}

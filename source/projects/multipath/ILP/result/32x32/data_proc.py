@@ -134,6 +134,12 @@ for a in numAgents:
 
 ########################################################################	
 plt.figure()
+plt.xlabel('Number of Robots (N)',fontsize=18)
+plt.ylabel('Computation Time (s)',fontsize=18)
+font1 = {'family' : 'Serif',
+'weight' : 'normal',
+'size'   : 16,
+}
 plt.ylim(0, 150)
 numAgents=get_num_agents('./ILP/random-32-32-10-random.txt')
 l0,=plt.plot(numAgents,np.array(meanTimeILP)/1000.,marker='o',color='blue')
@@ -150,10 +156,8 @@ l5,=plt.plot(numAgents,np.array(meanTime6t)/1000.,marker=6,color='purple')
 #l5,=plt.plot([100,200,300],meanTime8t,marker='.',color='purple')
 #l1,=plt.plot(numAgents,np.array(meantime9SS)/1000.,marker='s',color='red')
 
-
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Computation Time (s)')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-3t','ILP-4t','ILP-5t','ILP-6t'])
+plt.tick_params(labelsize=16)
+plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-3t','ILP-4t','ILP-5t','ILP-6t'],prop=font1)
 plt.savefig("ksplit-32-32-runtime.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 
@@ -173,9 +177,15 @@ numAgents=get_num_agents('./5t/random-32-32-10-random.txt')
 l4,=plt.plot(numAgents,opt5t,marker=5,color='black')
 numAgents=get_num_agents('./6t/random-32-32-10-random.txt')
 l5,=plt.plot(numAgents,opt6t,marker=6,color='purple')
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Optimality Ratio')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-3t','ILP-4t','ILP-5t','ILP-6t'])
+
+plt.xlabel('Number of Robots (N)',fontsize=18)
+plt.ylabel('Optimality Ratio',fontsize=18)
+font1 = {'family' : 'Serif',
+'weight' : 'normal',
+'size'   : 16,
+}
+plt.tick_params(labelsize=16)
+#plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-3t','ILP-4t','ILP-5t','ILP-6t'])
 plt.savefig("ksplit-32-32-opt.pdf", bbox_inches="tight", pad_inches=0.05)
 plt.show()
 ################################################################################################
@@ -256,10 +266,12 @@ l5,=plt.plot(numAgents,np.array(meanTimeECBS4t_tt)/1000.,marker=6,color='purple'
 #l1,=plt.plot(numAgents,np.array(meantime9SS)/1000.,marker='s',color='red')
 
 
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Computation Time (s)')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-4t','ECBS','ECBS-2t','ECBS-4t'])
+plt.xlabel('Number of Robots (N)',fontsize=18)
+plt.ylabel('Computation Time (s)',fontsize=18)
+plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-4t','ECBS','ECBS-2t','ECBS-4t'],prop=font1)
+plt.tick_params(labelsize=16)
 plt.savefig("ksplit-32-32-runtime-flowtime.pdf", bbox_inches="tight", pad_inches=0.05)
+
 plt.show()
 
 
@@ -277,10 +289,12 @@ numAgents=get_num_agents('./ecbs-2t-tt/random-32-32-10-random.txt')
 l4,=plt.plot(numAgents,optECBS2t_tt,marker=5,color='black')
 numAgents=get_num_agents('./ecbs-4t-tt/random-32-32-10-random.txt')
 l5,=plt.plot(numAgents,optECBS4t_tt,marker=6,color='purple')
-plt.xlabel('Number of Robots (N)')
-plt.ylabel('Optimality Ratio')
-plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-4t','ECBS','ECBS-2t','ECBS-4t'])
+plt.xlabel('Number of Robots (N)',fontsize=18)
+plt.ylabel('Optimality Ratio',fontsize=18)
+#plt.legend(handles=[l0,l1,l2,l3,l4,l5],labels=['ILP','ILP-2t','ILP-4t','ECBS','ECBS-2t','ECBS-4t'])
+plt.tick_params(labelsize=16)
 plt.savefig("ksplit-32-32-opt-flowtime.pdf", bbox_inches="tight", pad_inches=0.05)
+
 plt.show()
 ################################################################################################
 

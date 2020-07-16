@@ -67,7 +67,7 @@ public class Solve{
 		PathPlanner ms = new PathPlanner();
 		long time = System.currentTimeMillis();
 		int makespanLb = PathFinder.getMakespanLowerBound(p.graph, p.sg[0], p.sg[1]);
-	
+		if(makespanLb==-1) return null;
 		int[][] paths = null;
 		// int[][] paths = ms.planPathsAdvancedSplitBySize(p.graph, p.sg[0], p.sg[1], setOptimal, timeLimit, 3);
 		// int[][] paths = ms.planPathsAdvancedSplitBySizeNoCycle(p.graph, p.sg[0], p.sg[1], setOptimal, timeLimit, 4, true);

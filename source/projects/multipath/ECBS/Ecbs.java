@@ -276,7 +276,7 @@ public class Ecbs{
 			}
 		}
 		
-		return new long[]{cost,0,0,0};
+		return new long[]{makespan,0,0,0};
 	}
 	
 	

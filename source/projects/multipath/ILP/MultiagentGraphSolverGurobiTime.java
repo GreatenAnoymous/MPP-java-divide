@@ -104,12 +104,13 @@ public class MultiagentGraphSolverGurobiTime extends GRBCallback{
 			if(bDebugInfo){
 				System.out.print("Trying T = " + startTimeSteps + " for the integer model " + (hasTimeLimit?("with max time limit " + timeLimit):"") + "...");
 			}
-		//	try{
+			try{
 				model = prepareModel(env, graph, starts, goals, true, setOptimal, startTimeSteps, hasTimeLimit ? timeLimit : -1);
-		//	}
-		//	catch(OutOfMemoryError e){
-		//		return null;
-		//	}
+			}
+			catch(GRBException e){
+				System.out.println("Out of memo");
+				return null;
+			}
 			
 			expectedBound = starts.length;
 //			model.setCallback(this);
@@ -376,7 +377,7 @@ public class MultiagentGraphSolverGurobiTime extends GRBCallback{
 		}
 		}
 		catch(OutOfMemoryError e){
-			throw new OutOfMemoryError();
+			throw new GRBException();
 		}
 		// Setup constraint for single edges
 		Long[] edgeTimeKeys = edgeTimeVarVectorMap.keySet().toArray(new Long[0]);
